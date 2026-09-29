@@ -1,5 +1,1 @@
-# Editor and OS files
-.idea/
-.vscode/
-*.swp
-.DS_Store
+.agents_source
