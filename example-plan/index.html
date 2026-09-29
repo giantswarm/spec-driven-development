@@ -1,0 +1,504 @@
+<title>One install package for Pintail</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  :root {
+    --ink:      #1a1f1e;   /* near-black, slight green bias */
+    --body:     #2c3633;
+    --muted:    #5d6b67;
+    --faint:    #8b9690;
+    --paper:    #faf9f5;
+    --paper-2:  #f1efe8;
+    --line:     #dddace;
+    --line-2:   #c9c6b8;
+
+    --teal:     #0c6657;   /* durable / primary accent */
+    --teal-bg:  #e7f1ee;
+    --amber:    #9a5418;   /* ephemeral / loss / warning */
+    --amber-bg: #f5ebdf;
+
+    --code-bg:  #1c2422;
+    --code-fg:  #cdd6d2;
+
+    --mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+    --sans: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --measure: 70ch;
+
+    --note-border: #e6d3bb;
+    --note-ink:    #5e4528;
+  }
+
+  html[data-theme="dark"] {
+    --ink:      #e9ede9;
+    --body:     #c3ccc7;
+    --muted:    #8f9a94;
+    --faint:    #6c776f;
+    --paper:    #151918;
+    --paper-2:  #1d2321;
+    --line:     #2b3431;
+    --line-2:   #3a4440;
+
+    --teal:     #4cc6ab;
+    --teal-bg:  #133029;
+    --amber:    #d8934f;
+    --amber-bg: #2d2417;
+
+    --code-bg:  #0f1413;
+    --code-fg:  #cdd6d2;
+
+    --note-border: #4a3e26;
+    --note-ink:    #e0c79f;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--body);
+    font-family: var(--sans);
+    font-size: 16.5px;
+    line-height: 1.62;
+    -webkit-font-smoothing: antialiased;
+    transition: background 0.2s ease, color 0.2s ease;
+  }
+
+  .wrap { max-width: 880px; margin: 0 auto; padding: 0 32px; }
+
+  a { color: var(--teal); text-decoration: none; border-bottom: 1px solid rgba(12,102,87,0.3); }
+  a:hover { border-bottom-color: var(--teal); }
+  a:focus-visible { outline: 2px solid var(--teal); outline-offset: 2px; }
+
+  code {
+    font-family: var(--mono); font-size: 0.86em;
+    background: var(--paper-2); border: 1px solid var(--line);
+    padding: 0.5px 5px; border-radius: 4px; color: var(--ink);
+    word-break: break-word;
+  }
+
+  h1, h2, h3 { color: var(--ink); text-wrap: balance; font-weight: 650; letter-spacing: -0.01em; }
+
+  /* ---------- DOCUMENT HEADER ---------- */
+  header {
+    border-bottom: 2px solid var(--ink);
+    padding: 40px 0 26px;
+  }
+  header h1 { font-size: clamp(1.7rem, 4vw, 2.5rem); line-height: 1.12; margin: 0 0 18px; }
+  .meta {
+    display: flex; flex-wrap: wrap; gap: 6px 28px;
+    font-family: var(--mono); font-size: 12.5px; color: var(--muted);
+  }
+  .meta span b { color: var(--body); font-weight: 600; }
+
+  /* ---------- ABSTRACT (optional) ---------- */
+  .abstract {
+    margin: 30px 0 0; padding: 20px 24px;
+    background: var(--paper-2); border-left: 3px solid var(--teal);
+    border-radius: 0 4px 4px 0;
+  }
+  .abstract p { margin: 0; font-size: 16px; color: var(--body); max-width: var(--measure); }
+  .abstract p + p { margin-top: 12px; }
+
+  /* ---------- SECTIONS ---------- */
+  section { padding: 44px 0; border-bottom: 1px solid var(--line); }
+  section:last-of-type { border-bottom: none; }
+
+  h2 {
+    font-size: 1.45rem; margin: 0 0 6px;
+    display: flex; align-items: baseline; gap: 12px;
+  }
+  h2 .no {
+    font-family: var(--mono); font-size: 0.78rem; color: var(--faint);
+    font-weight: 500; letter-spacing: 0.04em;
+  }
+  .lead { margin: 0 0 8px; color: var(--muted); max-width: var(--measure); }
+  p { max-width: var(--measure); }
+  section > .wrap > p { margin: 14px 0; }
+
+  h3 { font-size: 1.05rem; margin: 26px 0 6px; }
+
+  ul.plain { margin: 14px 0; padding-left: 20px; max-width: var(--measure); }
+  ul.plain li { margin: 7px 0; }
+  ul.plain li b { color: var(--ink); }
+
+  /* ---------- PATH / INLINE EMPHASIS ---------- */
+  .pathbox {
+    margin: 20px 0; padding: 16px 20px; background: var(--code-bg);
+    border-radius: 6px; font-family: var(--mono); font-size: 15px;
+    color: var(--code-fg); overflow-x: auto;
+  }
+  .pathbox .tmp { color: #4cc6ab; }
+  .pathbox .sid { color: #e0a35c; }
+  .pathbox .cm  { color: #7a8b86; }
+
+  /* ---------- DEFINITION TABLE (decisions, fields, options) ---------- */
+  .deftable { width: 100%; border-collapse: collapse; margin: 20px 0; }
+  .deftable th, .deftable td {
+    text-align: left; vertical-align: top; padding: 12px 16px;
+    border-bottom: 1px solid var(--line); font-size: 15px;
+  }
+  .deftable thead th {
+    font-family: var(--mono); font-size: 11px; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--muted); border-bottom: 1px solid var(--line-2);
+    font-weight: 600;
+  }
+  .deftable td:first-child, .deftable th:first-child { white-space: nowrap; }
+  .deftable td.key { font-family: var(--mono); font-size: 13px; color: var(--teal); }
+  .deftable td p { margin: 0; max-width: none; color: var(--body); }
+  .deftable tr:last-child td { border-bottom: none; }
+  .tablescroll { overflow-x: auto; }
+
+  /* ---------- CODE ---------- */
+  figure { margin: 22px 0; }
+  .codewrap { border: 1px solid var(--line-2); border-radius: 6px; overflow: hidden; }
+  .codebar {
+    font-family: var(--mono); font-size: 12px; color: var(--faint);
+    padding: 8px 16px; background: var(--paper-2); border-bottom: 1px solid var(--line);
+  }
+  pre {
+    margin: 0; padding: 18px 20px; overflow-x: auto; background: var(--code-bg);
+    font-family: var(--mono); font-size: 13px; line-height: 1.65; color: var(--code-fg);
+    tab-size: 2;
+  }
+  pre .c  { color: #6f827d; }   /* comment */
+  pre .k  { color: #5fb8a5; }   /* key */
+  pre .v  { color: #d8b878; }   /* value */
+  pre .hi { color: #e0a35c; }   /* highlight */
+  pre .d  { color: #6f827d; }   /* divider --- */
+  figcaption { font-size: 13px; color: var(--muted); margin-top: 8px; }
+
+  /* ---------- MERMAID ---------- */
+  .mermaid-host {
+    padding: 22px 20px; background: var(--paper-2);
+    display: flex; justify-content: center; overflow-x: auto;
+  }
+  .mermaid-host svg { max-width: 100%; height: auto; }
+  .mermaid-src { display: none; }
+
+  /* ---------- SCOPE (two-column in/out) ---------- */
+  .scope { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 18px; }
+  @media (max-width: 680px) { .scope { grid-template-columns: 1fr; } }
+  .scope h3 {
+    margin: 0 0 12px; font-family: var(--mono); font-size: 12px;
+    letter-spacing: 0.1em; text-transform: uppercase; padding-bottom: 8px;
+  }
+  .scope .in  h3 { color: var(--teal);  border-bottom: 1px solid var(--teal); }
+  .scope .out h3 { color: var(--amber); border-bottom: 1px solid var(--amber); }
+  .scope ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 12px; }
+  .scope li { font-size: 14.5px; line-height: 1.5; }
+  .scope li b { color: var(--ink); }
+
+  /* ---------- ORDERED STEPS ---------- */
+  ol.steps { margin: 18px 0 0; padding: 0; list-style: none; counter-reset: s; max-width: var(--measure); }
+  ol.steps li {
+    counter-increment: s; padding: 14px 0 14px 44px; position: relative;
+    border-top: 1px solid var(--line); font-size: 15px;
+  }
+  ol.steps li:last-child { border-bottom: 1px solid var(--line); }
+  ol.steps li::before {
+    content: counter(s); position: absolute; left: 0; top: 13px;
+    font-family: var(--mono); font-size: 12px; font-weight: 600; color: var(--teal);
+    width: 26px; height: 26px; border: 1px solid var(--line-2); border-radius: 50%;
+    display: flex; align-items: center; justify-content: center; background: var(--paper);
+  }
+  ol.steps li b { color: var(--ink); }
+
+  /* ---------- CALLOUT ---------- */
+  .note {
+    margin: 18px 0; padding: 14px 18px; border-radius: 5px;
+    background: var(--amber-bg); border: 1px solid var(--note-border);
+    font-size: 14.5px; color: var(--note-ink);
+  }
+  .note b { color: var(--amber); }
+
+  footer {
+    padding: 30px 0 50px; font-family: var(--mono); font-size: 12px; color: var(--faint);
+  }
+
+  /* ---------- THEME TOGGLE (floating) ---------- */
+  .themebar {
+    position: fixed; bottom: 20px; right: 20px; z-index: 50;
+    display: flex; gap: 4px; padding: 4px;
+    background: var(--paper-2); border: 1px solid var(--line-2);
+    border-radius: 999px; box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+  }
+  .themebar button {
+    appearance: none; cursor: pointer; border: none; background: transparent;
+    width: 36px; height: 36px; border-radius: 999px;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--muted); font-size: 16px; line-height: 1;
+    transition: background 0.15s ease, color 0.15s ease;
+  }
+  .themebar button:hover { color: var(--ink); }
+  .themebar button[aria-pressed="true"] { background: var(--teal-bg); color: var(--teal); }
+  .themebar button:focus-visible { outline: 2px solid var(--teal); outline-offset: 2px; }
+</style>
+
+<!-- ============================ HEADER ============================ -->
+<header>
+  <div class="wrap">
+    <h1>One install package for Pintail</h1>
+    <div class="meta">
+      <span><b>Plan</b> <a href="https://github.com/acme/team-plans/blob/main/example-plan/SPEC.md">SPEC.md</a></span>
+      <span><b>Tracking</b> <a href="https://github.com/acme/pintail/issues/412">acme/pintail#412</a></span>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="abstract">
+    <p>Pintail, a self-hosted feature-flag service, ships as three Helm charts and depends on cert-manager without saying so: the install succeeds, the first <code>FlagSet</code> fails. This plan makes the existing <code>pintail-server</code> chart the one <b>install package</b> and removes the hidden runtime prerequisite with a self-signed webhook certificate. No new chart, CLI or controller.</p>
+    <p><b>Worked example.</b> Pintail and every repository, path and issue cited here are fictional, invented to show the template's workflow. The ground-truth and contrarian evidence is illustrative and says so.</p>
+  </div>
+</div>
+
+<section>
+  <div class="wrap">
+    <h2><span class="no">1</span> Problem</h2>
+    <p class="lead">Three charts, one undocumented prerequisite, and a product that breaks on first use.</p>
+    <p>An operator installs <code>pintail-crds</code>, then <code>pintail-server</code>, then <code>pintail-console</code>. The server's admission webhook validates every <code>FlagSet</code> and fails closed; its TLS certificate comes from cert-manager. On a cluster without cert-manager the chart silently skips the certificate, the webhook listener never starts, and the first <code>kubectl apply</code> of a <code>FlagSet</code> fails.</p>
+    <figure>
+      <div class="codewrap">
+        <div class="codebar">today, on a cluster without cert-manager</div>
+        <div class="mermaid-host">
+          <script type="text/plain" class="mermaid-src">
+sequenceDiagram
+  participant Op as Operator
+  participant H as helm
+  participant API as Kubernetes API
+  participant S as pintail-server
+  Op->>H: install three charts
+  H->>API: render, Certificate skipped
+  H-->>Op: deployed
+  S->>S: no cert, webhook listener not started
+  Op->>API: apply FlagSet
+  API->>S: validate (failurePolicy Fail)
+  S--xAPI: connection refused
+  API-->>Op: rejected
+          </script>
+        </div>
+      </div>
+      <figcaption>A green install followed by a failure at first real use: cert-manager is a hidden runtime prerequisite.</figcaption>
+    </figure>
+    <div class="note"><b>Runtime prerequisite.</b> Something that must already be running in the cluster for the product to work after an install that succeeded without it; hidden when the install neither provides, checks nor documents it. Sharpened in grill session 1, Q3.</div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2><span class="no">2</span> Solution</h2>
+    <p class="lead"><code>pintail-server</code> becomes the install package: one <code>helm install</code> on a bare cluster yields the whole product.</p>
+    <div class="tablescroll">
+      <table class="deftable">
+        <thead><tr><th>Moving part</th><th>What changes</th></tr></thead>
+        <tbody>
+          <tr><td class="key">webhook certificate</td><td><p>New default source <code>self-signed</code>: the server generates the certificate, stores it in a Secret and injects the CA into its own webhook configuration. cert-manager stays an opt-in source.</p></td></tr>
+          <tr><td class="key">console</td><td><p>Already embedded in the server; <code>console.enabled</code> flips to <code>true</code>.</p></td></tr>
+          <tr><td class="key">CRDs</td><td><p>The server already applies its own CRDs at startup; the manual step and the <code>pintail-crds</code> chart retire.</p></td></tr>
+          <tr><td class="key">old charts</td><td><p>One final release each that makes leaving them safe, then deprecation.</p></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2><span class="no">3</span> User stories</h2>
+    <ul class="plain">
+      <li><b>Operator, fresh cluster.</b> One <code>helm install</code> gives the whole product; the webhook works without cert-manager; a green install means a working product.</li>
+      <li><b>Operator with cert-manager.</b> Keeps issuing the webhook certificate through it.</li>
+      <li><b>Operator, day 2.</b> Evaluations keep flowing during certificate rotation; every replica serves the same certificate; CRD changes arrive with the server upgrade.</li>
+      <li><b>Operator, console.</b> Reachable after install without a second chart, and off with one value.</li>
+      <li><b>Operator on the three-chart layout.</b> A documented migration that keeps every <code>FlagSet</code>, announced by the deprecated charts themselves.</li>
+      <li><b>Flag author.</b> Validation behaves exactly as before.</li>
+      <li><b>Security reviewer.</b> The self-signed CA is scoped to the webhook Service only, and the server may patch only its own webhook configuration.</li>
+      <li><b>Maintainer.</b> One chart, one release process, one install guide, and an acceptance test that stops a hidden runtime prerequisite from coming back.</li>
+    </ul>
+    <p>The full numbered list (16 stories) is in <a href="SPEC.md">SPEC.md</a>.</p>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2><span class="no">4</span> Implementation decisions</h2>
+    <div class="tablescroll">
+      <table class="deftable">
+        <thead><tr><th>Decision</th><th>Rationale</th></tr></thead>
+        <tbody>
+          <tr><td class="key">no umbrella chart</td><td><p><code>pintail-server</code> already carries server, Service, webhook and console switch. Dropped after the contrarian's first pass.</p></td></tr>
+          <tr><td class="key">certificate.source: self-signed</td><td><p>A third value of the existing <code>webhook.certificate.source</code> enum, and the new default. <code>cert-manager</code> and <code>secret</code> are unchanged. (Ground truth corrected the value's name.)</p></td></tr>
+          <tr><td class="key">no bundled cert-manager</td><td><p>Recommended by the agent, overruled by the human: cert-manager is a cluster-wide singleton, and one certificate for one Service does not justify shipping it.</p></td></tr>
+          <tr><td class="key">failurePolicy: Fail</td><td><p>Kept. Readiness includes the webhook listener, so the API server reaches only pods that can validate; flag evaluation does not wait.</p></td></tr>
+          <tr><td class="key">scoped RBAC</td><td><p>One Secret; one webhook configuration by <code>resourceNames</code>. Not rendered in the other two modes.</p></td></tr>
+          <tr><td class="key">loud guard</td><td><p><code>source: cert-manager</code> without the cert-manager API fails the render with the value to change.</p></td></tr>
+          <tr><td class="key">console.enabled: true</td><td><p>Default flip only; no new component.</p></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <figure>
+      <div class="codewrap">
+        <div class="codebar">self-signed mode, per replica at startup</div>
+        <div class="mermaid-host">
+          <script type="text/plain" class="mermaid-src">
+flowchart TD
+  a["Replica starts"] --> b{"Cert Secret exists?"}
+  b -- no --> c["Generate CA + serving cert"]
+  c --> d{"Create Secret"}
+  d -- created --> e["Load cert"]
+  d -- "already exists" --> f["Read winner's Secret"]
+  f --> e
+  b -- yes --> e
+  e --> g["Patch caBundle of own webhook config"]
+  g --> h["Start webhook listener, become ready"]
+  e -. "under 1/3 lifetime left" .-> i["Renew with resourceVersion-conditioned update"]
+          </script>
+        </div>
+      </div>
+      <figcaption>Create-if-absent makes every replica serve the same certificate; the conditioned update resolves concurrent renewals to one winner.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2><span class="no">5</span> Migration from the three-chart layout</h2>
+    <p class="lead"><code>pintail-crds</code> renders its CRD from <code>templates/</code>: uninstalling an earlier release deletes every <code>FlagSet</code>.</p>
+    <ol class="steps">
+      <li><b>Upgrade <code>pintail-crds</code> to its final release</b>, which adds <code>helm.sh/resource-policy: keep</code> to the CRD.</li>
+      <li><b>Upgrade <code>pintail-server</code></b> with the console on.</li>
+      <li><b>Uninstall <code>pintail-console</code></b>; it holds no state.</li>
+      <li><b>Uninstall <code>pintail-crds</code></b>; the CRD and every <code>FlagSet</code> stay.</li>
+    </ol>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2><span class="no">6</span> Testing decisions: the test gate</h2>
+    <p class="lead">The plan is done when these three scenarios pass in CI on <code>pintail-server</code> main. Nothing less, and nothing else required.</p>
+    <div class="pathbox"><span class="tmp">seam</span>: helm install/upgrade/uninstall + kubectl FlagSet + HTTP API<span class="cm">  # the only one</span></div>
+    <ol class="steps">
+      <li><b>Bare cluster.</b> kind, no cert-manager, no values. A valid <code>FlagSet</code> is accepted, an invalid one rejected with its message, a flag evaluates, the console answers 200. With two replicas, ten consecutive applies all succeed.</li>
+      <li><b>cert-manager present.</b> <code>source: cert-manager</code>: same assertions, the CA matches the issued certificate, no self-signed Secret. Same value without cert-manager: the install fails with the guard's message.</li>
+      <li><b>Migration.</b> Old layout with five <code>FlagSet</code>s, documented order applied: all five still evaluate unchanged, <code>helm list</code> shows one Pintail release, the console answers 200.</li>
+    </ol>
+    <div class="note"><b>One exception below the seam.</b> Certificate renewal depends on time. The certificate module gets unit tests with an injected clock for two behaviours only: renewal after the threshold, and two concurrent renewals yielding one certificate.</div>
+    <p>A good test fails if a user would notice, and only then. Prior art: the server's existing kind-based end-to-end suite, which the scenarios extend.</p>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2><span class="no">7</span> Scope</h2>
+    <div class="scope">
+      <div class="in">
+        <h3>In scope</h3>
+        <ul>
+          <li><b>Self-signed certificate source</b>, as the default.</li>
+          <li><b>Loud guard</b> for the <code>cert-manager</code> source.</li>
+          <li><b>Console on by default.</b></li>
+          <li><b>Final releases</b> of the two retiring charts.</li>
+          <li><b>Docs</b>: one-command install guide, a Certificates page, a rewritten troubleshooting entry.</li>
+          <li><b>Three acceptance scenarios</b> plus the renewal unit tests.</li>
+        </ul>
+      </div>
+      <div class="out">
+        <h3>Out of scope</h3>
+        <ul>
+          <li><b>Any new controller, operator or CLI.</b></li>
+          <li><b>Bundling cert-manager</b>, in any form.</li>
+          <li><b>Changes to validation rules</b> or the evaluation API.</li>
+          <li><b>GitOps installs</b>: not prevented, not tested.</li>
+          <li><b>Archiving the old repositories</b>: two server minor releases later.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2><span class="no">8</span> How the plan got here</h2>
+    <div class="tablescroll">
+      <table class="deftable">
+        <thead><tr><th>Artifact</th><th>Outcome</th></tr></thead>
+        <tbody>
+          <tr><td class="key"><a href="grill-sessions/2026-09-22-one-install-package.md">grill, session 1</a></td><td><p>Seven questions. Two glossary terms (<b>Install package</b>, <b>Runtime prerequisite</b>, the latter sharpened by the human). Q4 overruled: no bundled cert-manager.</p></td></tr>
+          <tr><td class="key"><a href="contrarian/2026-09-22-one-install-package.md">contrarian, pass 1</a></td><td><p><b>SIMPLIFY.</b> Two of five stated problems already solved in the server (CRD management, embedded console). Simplest path: documentation plus one small component. Umbrella, CRD hook and wrapper CLI dropped.</p></td></tr>
+          <tr><td class="key"><a href="grill-sessions/2026-09-23-rework-after-contrarian.md">grill, session 2</a></td><td><p>Three questions: install package is <code>pintail-server</code>; safe retirement of the old charts; the test gate at one seam.</p></td></tr>
+          <tr><td class="key"><a href="ground-truth/2026-09-23-one-install-package.md">ground truth</a></td><td><p>8 claims: 7 verified, 1 mismatch. A hallucinated <code>certManager.enabled</code> value was replaced by the real <code>webhook.certificate.source</code> enum.</p></td></tr>
+          <tr><td class="key"><a href="contrarian/2026-09-22-one-install-package.md">contrarian, pass 2</a></td><td><p><b>BUILD.</b> Every remaining new thing justified; nothing cheaper left.</p></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="note"><b>Why the grill missed two stale problems.</b> It read the <code>pintail-crds</code> README, which still documents the manual CRD step. The contrarian re-derived the facts from the server's source. That independence is the point.</div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">One install package for Pintail: the server chart becomes the install package, cert-manager becomes optional · originates from <a href="https://github.com/acme/pintail/issues/412">acme/pintail#412</a><br>Generated 2026-09-23 22:27 UTC</div>
+</footer>
+
+<!-- ============================ THEME TOGGLE ============================ -->
+<div class="themebar" role="group" aria-label="Color theme">
+  <button id="theme-light" type="button" title="Light mode" aria-label="Light mode">☀</button>
+  <button id="theme-dark" type="button" title="Dark mode" aria-label="Dark mode">☾</button>
+</div>
+
+<!-- Mermaid: auto-discovers every .mermaid-src, renders it into its .mermaid-host,
+     and re-renders on theme change. Add diagrams in HTML only , no edits here. -->
+<script type="module">
+  import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+
+  function dedent(s) {
+    var lines = s.replace(/^\n+/, '').replace(/\s+$/, '').split('\n');
+    var widths = lines.filter(function (l) { return l.trim(); })
+      .map(function (l) { return l.match(/^ */)[0].length; });
+    var indent = widths.length ? Math.min.apply(null, widths) : 0;
+    return lines.map(function (l) { return l.slice(indent); }).join('\n');
+  }
+
+  var hosts = [].slice.call(document.querySelectorAll('.mermaid-host'));
+  hosts.forEach(function (h) {
+    var src = h.querySelector('.mermaid-src');
+    h._src = src ? dedent(src.textContent) : '';
+  });
+
+  var n = 0;
+  window.renderMermaid = async function (theme) {
+    mermaid.initialize({ startOnLoad: false, securityLevel: 'strict', theme: theme === 'dark' ? 'dark' : 'neutral' });
+    for (var i = 0; i < hosts.length; i++) {
+      if (!hosts[i]._src) continue;
+      try {
+        var out = await mermaid.render('m' + (n++), hosts[i]._src);
+        hosts[i].innerHTML = out.svg;
+      } catch (e) { hosts[i].textContent = 'diagram failed to render'; }
+    }
+  };
+
+  window.renderMermaid(document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light');
+</script>
+
+<script>
+  (function () {
+    var root = document.documentElement;
+    var btnLight = document.getElementById('theme-light');
+    var btnDark = document.getElementById('theme-dark');
+
+    function apply(theme) {
+      if (theme === 'dark') root.setAttribute('data-theme', 'dark');
+      else root.removeAttribute('data-theme');
+      btnLight.setAttribute('aria-pressed', String(theme !== 'dark'));
+      btnDark.setAttribute('aria-pressed', String(theme === 'dark'));
+      try { localStorage.setItem('theme', theme); } catch (e) {}
+      if (typeof window.renderMermaid === 'function') window.renderMermaid(theme);
+    }
+
+    var saved;
+    try { saved = localStorage.getItem('theme'); } catch (e) {}
+    apply(saved === 'dark' ? 'dark' : 'light');   // default: light
+
+    btnLight.addEventListener('click', function () { apply('light'); });
+    btnDark.addEventListener('click', function () { apply('dark'); });
+  })();
+</script>
