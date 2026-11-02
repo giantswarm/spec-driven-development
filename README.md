@@ -21,14 +21,15 @@ One directory per plan, reviewed as one pull request:
 
 - **`SPEC.md`**: the source of truth the implementing agent works from
 - **`index.html`**: the page reviewers read, rendered from the spec
-- dated artifacts: grilling logs, research, ground-truth reports, contrarian verdicts
+- dated artifacts: grilling logs, research, security reviews, ground-truth reports, contrarian
+  verdicts
 
 See [`example-plan/`](./example-plan) for a complete one.
 
 ## The workflow
 
 ```
-/plan  →  /grill-me  →  /to-spec  →  /ground-truth  +  /contrarian  →  /to-website  →  (/to-issues)
+/plan  →  /grill-me  →  /to-spec  →  /security-review  →  /ground-truth  +  /contrarian  →  /to-website  →  (/to-issues)
 ```
 
 | Step | What it does |
@@ -36,6 +37,7 @@ See [`example-plan/`](./example-plan) for a complete one.
 | `/plan` | Runs the whole pipeline from a seed (an issue, an idea, a file) |
 | `/grill-me` | Interviews you about every decision, logs each answer, keeps the glossary sharp |
 | `/to-spec` | Turns the interview into `SPEC.md`, including the test gate |
+| `/security-review` | Threat-models the spec and verifies the controls it relies on: PASS, MITIGATE or BLOCK. Always runs |
 | `/ground-truth` | Checks every claim about existing code and facts against the real source |
 | `/contrarian` | Tries to kill the plan: BUILD, SIMPLIFY or KILL. Anything but BUILD goes back to grilling |
 | `/to-website` | Renders `index.html` for reviewers |
@@ -57,7 +59,8 @@ run and a local environment to try things in.
 
 ## The skills
 
-`plan`, `ground-truth`, `contrarian` and `to-website` are original to this repo.
+`plan`, `security-review`, `ground-truth`, `contrarian` and `to-website` are original to this
+repo.
 `grill-me`, `to-spec`, `to-issues` and `research` are customized copies from
 [Matt Pocock's skills](https://github.com/mattpocock/skills). See
 [`.agents/skills/UPSTREAM.md`](./.agents/skills/UPSTREAM.md) before pulling upstream

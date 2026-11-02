@@ -32,13 +32,19 @@ This repo stores **plans** in a versioned manner: each plan is its own directory
   (`BUILD` / `SIMPLIFY` / `KILL`) to `<plan-dir>/contrarian/<YYYY-MM-DD>-<slug>.md`.
   `SIMPLIFY` and `KILL` send the plan back to grilling before any website or issues work.
 
+- **Security reviews.** Each `/security-review` run writes its threat model and verdict
+  (`PASS` / `MITIGATE` / `BLOCK`) to `<plan-dir>/security-review/<YYYY-MM-DD>-<slug>.md`.
+  `/plan` always runs it. `MITIGATE` and `BLOCK` stop the plan before any website or issues
+  work.
+
 - **Plans land via pull request.** Commit a plan directory on a branch and open a PR. The
   PR is the review surface — that is the point of this repo.
 
 ## Agent skills
 
 The plan-creation workflow is codified in `/plan`, which sequences
-`/grill-me` → `/to-spec` → `/ground-truth` + `/contrarian` → `/to-website`, and optionally
+`/grill-me` → `/to-spec` → `/security-review` → `/ground-truth` + `/contrarian` →
+`/to-website`, and optionally
 `/to-issues`. Skills live in `.agents/skills/`, symlinked into `.claude/skills/` and
 `.cursor/skills/`.
 

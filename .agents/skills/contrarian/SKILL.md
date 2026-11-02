@@ -1,6 +1,6 @@
 ---
 name: contrarian
-description: Adversarial review of a finished spec — argue the plan is unnecessary, find the simplest path using only existing capabilities, and demand a written justification for every new subsystem. Runs after /to-spec, alongside /ground-truth, before /to-website. Use when the user says "contrarian", "red-team this plan", "try to kill this plan", or as the plan gate.
+description: Adversarial review of a finished spec — argue the plan is unnecessary, find the simplest path using only existing capabilities, and demand a written justification for every new subsystem. Runs after /to-spec and /security-review, alongside /ground-truth, before /to-website. Use when the user says "contrarian", "red-team this plan", "try to kill this plan", or as the plan gate.
 ---
 
 # contrarian
@@ -64,6 +64,6 @@ cheapest failure is here, on paper.
 - Independence matters: do not reuse the spec's own framing or the grill log's
   conclusions as evidence — re-derive from the sources.
 - Keep terminology aligned with `context/glossary.md`.
-- This skill does not verify factual claims (`/ground-truth` does); it only
-  attacks necessity and proportionality. Run both; they catch disjoint
-  failure modes.
+- This skill does not verify factual claims (`/ground-truth` does) or threat-model the
+  design (`/security-review` does); it only attacks necessity and proportionality. Run all
+  three; they catch disjoint failure modes.

@@ -6,8 +6,8 @@
 > issues and every file path cited in this directory are fictional, invented to show the
 > workflow on a realistic problem. Nothing here refers to a real product. Read the
 > artifacts in order: `grill-sessions/`, the contrarian verdict (first pass SIMPLIFY), the
-> second grill session, the ground-truth report, then this spec. Delete the directory once
-> you have real plans.
+> second grill session, the ground-truth report, then this spec. It predates `/security-review`,
+> so it has no security review. Delete the directory once you have real plans.
 
 ## Problem Statement
 
