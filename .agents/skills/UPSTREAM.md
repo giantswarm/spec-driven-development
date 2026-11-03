@@ -22,6 +22,7 @@ take future upstream releases without losing those changes.
 | `plan` | this repo | native, no upstream |
 | `ground-truth` | this repo | native, no upstream |
 | `contrarian` | this repo | native, no upstream |
+| `security-review` | this repo | native, no upstream |
 | `to-website` | this repo | native, no upstream |
 
 Synced against upstream **v1.2.3**.

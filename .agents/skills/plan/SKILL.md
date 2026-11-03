@@ -1,14 +1,14 @@
 ---
 name: plan
-description: End-to-end plan creation, wrapping /grill-me → /to-spec → /ground-truth + /contrarian → /to-website. Starts from a GitHub issue or a rough idea, creates the plan directory, runs the grilling interview, produces the spec, fact-checks it against real upstream source, red-teams its necessity, generates the companion website, and optionally breaks it into issues. Use when the user wants to start a new plan, says "plan this properly", "run the plan process", "new plan from this issue".
+description: End-to-end plan creation, wrapping /grill-me → /to-spec → /security-review → /ground-truth + /contrarian → /to-website. Starts from a GitHub issue or a rough idea, creates the plan directory, runs the grilling interview, produces the spec, threat-models it, fact-checks it against real upstream source, red-teams its necessity, generates the companion website, and optionally breaks it into issues. Use when the user wants to start a new plan, says "plan this properly", "run the plan process", "new plan from this issue".
 ---
 
 # plan
 
 Orchestrates the full plan-creation workflow of this repo: take a seed, create the plan
 directory, grill the user on it, then — with confirmation at each step — generate the spec,
-fact-check it against real source, red-team its necessity, and produce its companion
-website. Each stage delegates to an existing skill; this skill only sequences them and
+threat-model it, fact-check it against real source, red-team its necessity, and produce its
+companion website. Each stage delegates to an existing skill; this skill only sequences them and
 carries the seed context through.
 
 ## Workflow
@@ -40,8 +40,8 @@ access), report the error and ask for a corrected reference — don't invent iss
 Derive a short kebab-case name (2–4 words, e.g. `persistent-workspace`,
 `token-exchange-teleport`) from the seed. Tell the user the name you chose and create it as
 a top-level directory of this repo. One directory per plan: `SPEC.md` and `index.html` both
-live there, alongside the `grill-sessions/`, `ground-truth/`, `contrarian/` and `research/`
-artifacts produced along the way.
+live there, alongside the `grill-sessions/`, `security-review/`, `ground-truth/`,
+`contrarian/` and `research/` artifacts produced along the way.
 
 ### 4. Grill the user
 
@@ -59,7 +59,17 @@ When grilling is done, ask: *create the spec now with to-spec?*
 - **No** → reply: "When you're ready, run `/to-spec` in this conversation (or a session with
   this context). Save the spec as `<plan-dir>/SPEC.md`." Then stop.
 
-### 6. Ground-truth the spec
+### 6. Security review
+
+Run **security-review** on `<plan-dir>/SPEC.md` — always, without asking whether to. It
+threat-models the design (trust boundaries, credentials, tenant isolation, untrusted input
+reaching agents), which neither ground-truth nor contrarian covers, and may edit the spec
+with the fixes the user approves. It runs first so ground-truth also checks the claims its
+fixes add, and contrarian judges the design with its security cost included. A `MITIGATE`
+or `BLOCK` verdict blocks the workflow: resolve the open findings and re-run it, or return
+to grilling. Do not proceed to the website with an open verdict.
+
+### 7. Ground-truth the spec
 
 Ask: *fact-check the plan against real source with ground-truth?* Run this **before** the
 website, so any hallucinated APIs, flags or fields are fixed in the spec before it's
@@ -70,7 +80,7 @@ rendered.
   the inline fixes the user approves. The spec may change here — that's expected.
 - **No** → reply: "When you're ready, run `/ground-truth <plan-dir>/SPEC.md`." Then continue.
 
-### 7. Contrarian gate
+### 8. Contrarian gate
 
 Ask: *run the contrarian review?* Strongly recommend yes — it attacks the plan's
 **necessity** (is there an existing capability that already covers this?), which
@@ -82,25 +92,25 @@ ground-truth's claim-checking does not.
 - **No** → reply: "When you're ready, run `/contrarian <plan-dir>/SPEC.md` before rendering
   the website." Then continue.
 
-### 8. Offer the website
+### 9. Offer the website
 
 Ask: *generate the companion website with to-website?*
 
 - **Yes** → invoke **to-website** on the spec.
 - **No** → reply: "When you're ready, run `/to-website <plan-dir>/SPEC.md`." Then stop.
 
-### 9. Wrap up
+### 10. Wrap up
 
 Commit the plan directory on a branch and open a pull request — the PR is what humans
 review. If `main` is protected, say so; if the repo allows direct commits, still prefer a
 PR, since reviewing the plan is the point of this repo.
 
-### 10. Offer the issue breakdown (optional)
+### 11. Offer the issue breakdown (optional)
 
 Ask: *break this plan into issues with to-issues?* Many teams stop at the reviewed spec and
 let the implementing agent work from it — only run this if the team tracks work as issues.
 
-### 11. Offer to link the plan on the issue
+### 12. Offer to link the plan on the issue
 
 The **final** action, only if the plan came from an issue and only if the user agrees.
 
@@ -123,10 +133,11 @@ Ask: *post a comment on the issue with a direct link to this plan?*
 
 ## Notes
 
-- Never skip a confirmation: steps 5, 6, 7, 8, 10 and 11 always ask before acting.
-- Step 11 is optional and always last — never post the comment mid-workflow, and never
+- Never skip a confirmation: steps 5, 7, 8, 9, 11 and 12 always ask before acting; step 6
+  asks about its fixes, never whether to run.
+- Step 12 is optional and always last — never post the comment mid-workflow, and never
   without an explicit "yes".
-- Ground-truth (step 6) runs on the spec and may edit it, always before the website is
-  rendered, so `index.html` reflects the corrected plan.
+- Security-review (step 6) and ground-truth (step 7) run on the spec and may edit it, always
+  before the website is rendered, so `index.html` reflects the corrected plan.
 - The spec markdown is the source of truth; `index.html` is always generated from it via
   to-website, never hand-written.

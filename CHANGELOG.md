@@ -9,6 +9,9 @@ New repo from the template? Clear this file and start your own history.
 
 ### Added
 
+- `security-review` skill: threat-models a finished spec, verifies the controls it relies on
+  against the plan's clones and writes a `PASS` / `MITIGATE` / `BLOCK` verdict. `/plan`
+  always runs it, right after `/to-spec` and before `/ground-truth` and `/contrarian`.
 - Initial template: the `plan`, `grill-me`, `to-spec`, `ground-truth`, `contrarian`,
   `to-website`, `to-issues` and `research` skills, the per-plan directory convention, the
   shared glossary, and a worked example plan.
